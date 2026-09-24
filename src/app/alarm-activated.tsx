@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useMemo, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { initialAlarms } from '@/data/alarms';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
@@ -21,7 +22,9 @@ export default function AlarmActivatedScreen() {
 
   const finish = () => {
     setDismissed(true);
-    Animated.spring(offset, { toValue: maxTravel, useNativeDriver: true }).start();
+    Animated.spring(offset, { toValue: maxTravel, useNativeDriver: true }).start(({ finished }) => {
+      if (finished) router.replace('/alarms');
+    });
   };
 
   const panResponder = useRef(
@@ -41,7 +44,8 @@ export default function AlarmActivatedScreen() {
   ).current;
 
   return (
-    <View style={styles.screen}>
+    <ScreenBackground>
+      <View style={styles.screen}>
       <View style={styles.alert}><Text style={styles.alertText}>¡Alarma sonando!</Text></View>
       <View style={styles.center}>
         <Text style={styles.title}>{alarm.name}</Text>
@@ -66,12 +70,13 @@ export default function AlarmActivatedScreen() {
       <Pressable onPress={() => router.back()} style={styles.backButton} accessibilityLabel="Volver">
         <ChevronLeft color={colors.primary} size={20} />
       </Pressable>
-    </View>
+      </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.white, paddingHorizontal: 40, paddingVertical: 100, alignItems: 'center' },
+  screen: { flex: 1, paddingHorizontal: 40, paddingVertical: 100, alignItems: 'center' },
   alert: { width: '100%', paddingHorizontal: 32, paddingVertical: 20, borderRadius: 50, backgroundColor: colors.accent, alignItems: 'center', boxShadow: '0px 8px 12px rgba(0, 0, 0, 0.6)' },
   alertText: { fontFamily: fonts.medium, fontSize: 20, color: colors.white },
   center: { flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
