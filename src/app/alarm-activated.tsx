@@ -1,12 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { initialAlarms } from '@/data/alarms';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
+
+const alarmSound = 'https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg';
 
 export default function AlarmActivatedScreen() {
   const { id: rawId } = useLocalSearchParams<{ id?: string | string[] }>();
@@ -19,9 +22,32 @@ export default function AlarmActivatedScreen() {
   const maxTravel = Math.max(trackWidth - knobWidth - 8, 0);
   const offset = useRef(new Animated.Value(0)).current;
   const currentOffset = useRef(0);
+  const player = useAudioPlayer(alarmSound, { updateInterval: 1000 });
+
+  useEffect(() => {
+    let mounted = true;
+
+    const startAlarmSound = async () => {
+      await setAudioModeAsync({ playsInSilentMode: true });
+      if (mounted) {
+        // expo-audio exposes looping as a mutable player property.
+        // eslint-disable-next-line react-hooks/immutability
+        player.loop = true;
+        player.play();
+      }
+    };
+
+    startAlarmSound().catch(() => undefined);
+
+    return () => {
+      mounted = false;
+    };
+  }, [player]);
 
   const finish = () => {
     setDismissed(true);
+    player.pause();
+    player.seekTo(0);
     Animated.spring(offset, { toValue: maxTravel, useNativeDriver: true }).start(({ finished }) => {
       if (finished) router.replace('/alarms');
     });
