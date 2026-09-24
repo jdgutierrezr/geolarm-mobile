@@ -5,15 +5,17 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AlarmsMap } from '@/components/alarms/AlarmsMap';
+import { NavBar } from '@/components/alarms/NavBar';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { initialAlarms } from '@/data/alarms';
-import { colors } from '@/theme/colors';
+import { alarmColors, colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 
 const week = ['L', 'M', 'I', 'J', 'V', 'S', 'D'];
 
 export default function AlarmDetailScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id: rawId } = useLocalSearchParams<{ id?: string | string[] }>();
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const alarm = useMemo(() => initialAlarms.find((item) => item.id === id) ?? initialAlarms[1], [id]);
   const [active, setActive] = useState(alarm.active);
 
@@ -21,15 +23,7 @@ export default function AlarmDetailScreen() {
     <ScreenBackground>
       <SafeAreaView style={styles.flex} edges={['top']}>
         <View style={styles.headerWrap}>
-          <View style={styles.header}>
-            <View style={styles.brand}>
-              <Text style={styles.geo}>Geo</Text>
-              <Text style={styles.larm}>larm</Text>
-            </View>
-            <Pressable onPress={() => router.back()} accessibilityLabel="Cerrar detalle" style={styles.closeButton}>
-              <Text style={styles.close}>X</Text>
-            </Pressable>
-          </View>
+          <NavBar onLogout={() => router.replace('/login')} />
         </View>
 
         <AlarmsMap
@@ -46,7 +40,7 @@ export default function AlarmDetailScreen() {
           </Pressable>
 
           <View style={styles.titleRow}>
-            <View style={styles.alarmDot} />
+            <View style={[styles.alarmDot, { backgroundColor: alarmColors[alarm.color] }]} />
             <Text style={styles.title}>{alarm.name}</Text>
             <Pressable
               onPress={() => setActive((value) => !value)}
@@ -91,18 +85,12 @@ function Detail({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   headerWrap: { paddingHorizontal: 12, paddingVertical: 20 },
-  header: { height: 80, borderRadius: 50, paddingHorizontal: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.primary, boxShadow: '0px 8px 12px rgba(0, 0, 0, 0.35)' },
-  brand: { flexDirection: 'row' },
-  geo: { fontFamily: fonts.semibold, fontSize: 28, color: colors.primary },
-  larm: { fontFamily: fonts.semibold, fontSize: 28, color: colors.accent },
-  closeButton: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
-  close: { fontFamily: fonts.medium, fontSize: 22, color: colors.primary },
   map: { height: 260 },
   content: { paddingHorizontal: 14, paddingTop: 12, paddingBottom: 24 },
   backLink: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
   backText: { fontFamily: fonts.medium, fontSize: 20, color: colors.accent },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 16 },
-  alarmDot: { width: 51, height: 51, borderRadius: 26, backgroundColor: '#22C55E' },
+  alarmDot: { width: 51, height: 51, borderRadius: 26 },
   title: { flex: 1, fontFamily: fonts.semibold, fontSize: 28, color: colors.text },
   toggle: { width: 64, height: 32, borderRadius: 18, padding: 4, justifyContent: 'center', backgroundColor: colors.border },
   toggleActive: { backgroundColor: colors.primary },

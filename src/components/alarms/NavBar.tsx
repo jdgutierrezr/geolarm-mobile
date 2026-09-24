@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
   },
   clouds: {
     ...StyleSheet.absoluteFill,
-    opacity: 0.35,
+    opacity: 0.55,
   },
 });

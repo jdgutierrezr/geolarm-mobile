@@ -8,7 +8,8 @@ import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 
 export default function AlarmActivatedScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id: rawId } = useLocalSearchParams<{ id?: string | string[] }>();
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const alarm = useMemo(() => initialAlarms.find((item) => item.id === id) ?? initialAlarms[2], [id]);
   const { width } = useWindowDimensions();
   const [trackWidth, setTrackWidth] = useState(Math.min(width - 80, 300));
