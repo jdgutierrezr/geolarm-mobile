@@ -12,7 +12,11 @@ type Props = {
 
 export function AlarmCard({ alarm, onToggle, onPress }: Props) {
   return (
-    <Pressable onPress={onPress} style={styles.card} accessibilityRole={onPress ? 'button' : undefined}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      accessibilityRole={onPress ? 'button' : undefined}
+    >
       <View style={[styles.dot, { backgroundColor: alarmColors[alarm.color] }]} />
       <View style={styles.texts}>
         <Text style={typography.cardTitle} numberOfLines={1}>
@@ -43,6 +47,9 @@ const styles = StyleSheet.create({
     paddingRight: 24,
     backgroundColor: colors.surface,
     boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.18)',
+  },
+  cardPressed: {
+    backgroundColor: colors.disabledBg,
   },
   dot: {
     width: 44,

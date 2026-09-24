@@ -35,8 +35,12 @@ export default function AlarmDetailScreen() {
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Pressable onPress={() => router.back()} style={styles.backLink} accessibilityRole="button">
-            <ChevronLeft color={colors.accent} size={18} strokeWidth={2.5} />
-            <Text style={styles.backText}>Volver</Text>
+            {({ pressed }) => (
+              <>
+                <ChevronLeft color={pressed ? colors.accentPressed : colors.accent} size={18} strokeWidth={2.5} />
+                <Text style={[styles.backText, pressed && styles.backTextPressed]}>Volver</Text>
+              </>
+            )}
           </Pressable>
 
           <View style={styles.titleRow}>
@@ -87,8 +91,9 @@ const styles = StyleSheet.create({
   headerWrap: { paddingHorizontal: 12, paddingVertical: 20 },
   map: { height: 260 },
   content: { paddingHorizontal: 14, paddingTop: 12, paddingBottom: 24 },
-  backLink: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
+  backLink: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingVertical: 6 },
   backText: { fontFamily: fonts.medium, fontSize: 20, color: colors.accent },
+  backTextPressed: { color: colors.accentPressed },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 16 },
   alarmDot: { width: 51, height: 51, borderRadius: 26 },
   title: { flex: 1, fontFamily: fonts.semibold, fontSize: 28, color: colors.text },
