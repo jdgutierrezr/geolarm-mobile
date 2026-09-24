@@ -23,13 +23,14 @@ type Props = {
   locationGranted: boolean;
   /** Se llama al tocar el botón de ubicación sin permiso concedido. */
   onLocationPermissionNeeded: () => void;
+  onAlarmPress?: (alarm: Alarm) => void;
   style?: StyleProp<ViewStyle>;
   ref?: Ref<AlarmsMapHandle>;
 };
 
 // El mapa es Leaflet dentro de un WebView (funciona en Expo Go sin API key de Google).
 // React Native le habla al mapa con `injectJavaScript` llamando las funciones de leafletHtml.
-export function AlarmsMap({ alarms, locationGranted, onLocationPermissionNeeded, style, ref }: Props) {
+export function AlarmsMap({ alarms, locationGranted, onLocationPermissionNeeded, onAlarmPress, style, ref }: Props) {
   const webViewRef = useRef<WebView>(null);
   const [ready, setReady] = useState(false);
 
@@ -54,6 +55,7 @@ export function AlarmsMap({ alarms, locationGranted, onLocationPermissionNeeded,
     const markers = alarms
       .filter((alarm) => alarm.active)
       .map((alarm) => ({
+        id: alarm.id,
         lat: alarm.coordinate.latitude,
         lng: alarm.coordinate.longitude,
         name: alarm.name,
@@ -96,7 +98,14 @@ export function AlarmsMap({ alarms, locationGranted, onLocationPermissionNeeded,
         ref={webViewRef}
         source={{ html: leafletHtml }}
         originWhitelist={['*']}
-        onMessage={(event) => event.nativeEvent.data === 'ready' && setReady(true)}
+        onMessage={(event) => {
+          const message = event.nativeEvent.data;
+          if (message === 'ready') setReady(true);
+          if (message.startsWith('alarm:')) {
+            const alarm = alarms.find((item) => item.id === message.slice('alarm:'.length));
+            if (alarm) onAlarmPress?.(alarm);
+          }
+        }}
         style={styles.webView}
         scrollEnabled={false}
         bounces={false}

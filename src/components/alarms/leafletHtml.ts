@@ -50,7 +50,7 @@ export const leafletHtml = `<!DOCTYPE html>
       return div.innerHTML;
     }
 
-    // markers: [{ lat, lng, name, address, svg, width, height }]
+    // markers: [{ id, lat, lng, name, address, svg, width, height }]
     window.setMarkers = function (markers) {
       markersLayer.clearLayers();
       markers.forEach(function (m) {
@@ -63,6 +63,7 @@ export const leafletHtml = `<!DOCTYPE html>
         });
         L.marker([m.lat, m.lng], { icon: icon })
           .bindPopup('<b>' + escapeHtml(m.name) + '</b><br/>' + escapeHtml(m.address))
+          .on('click', function () { window.ReactNativeWebView.postMessage('alarm:' + m.id); })
           .addTo(markersLayer);
       });
     };

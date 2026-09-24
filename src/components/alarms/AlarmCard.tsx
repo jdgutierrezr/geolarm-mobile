@@ -1,4 +1,4 @@
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import type { Alarm } from '@/data/alarms';
 import { alarmColors, colors } from '@/theme/colors';
@@ -7,11 +7,12 @@ import { typography } from '@/theme/typography';
 type Props = {
   alarm: Alarm;
   onToggle: (active: boolean) => void;
+  onPress?: () => void;
 };
 
-export function AlarmCard({ alarm, onToggle }: Props) {
+export function AlarmCard({ alarm, onToggle, onPress }: Props) {
   return (
-    <View style={styles.card}>
+    <Pressable onPress={onPress} style={styles.card} accessibilityRole={onPress ? 'button' : undefined}>
       <View style={[styles.dot, { backgroundColor: alarmColors[alarm.color] }]} />
       <View style={styles.texts}>
         <Text style={typography.cardTitle} numberOfLines={1}>
@@ -29,7 +30,7 @@ export function AlarmCard({ alarm, onToggle }: Props) {
         thumbColor={alarm.active ? colors.switchThumbOn : colors.switchThumbOff}
         ios_backgroundColor={colors.switchTrackOff}
       />
-    </View>
+    </Pressable>
   );
 }
 

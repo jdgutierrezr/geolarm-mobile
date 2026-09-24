@@ -44,13 +44,20 @@ export default function AlarmsScreen() {
           alarms={alarms}
           locationGranted={location.granted}
           onLocationPermissionNeeded={() => setShowLocationModal(true)}
+          onAlarmPress={(alarm) => router.push({ pathname: '/alarm-activated', params: { id: alarm.id } })}
           style={[styles.map, { height: height * 0.475 }]}
         />
 
         <FlatList
           data={alarms}
           keyExtractor={(alarm) => alarm.id}
-          renderItem={({ item }) => <AlarmCard alarm={item} onToggle={(active) => toggleAlarm(item.id, active)} />}
+          renderItem={({ item }) => (
+            <AlarmCard
+              alarm={item}
+              onToggle={(active) => toggleAlarm(item.id, active)}
+              onPress={() => router.push({ pathname: '/alarm-detail', params: { id: item.id } })}
+            />
+          )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           style={styles.list}
           contentContainerStyle={styles.listContent}
