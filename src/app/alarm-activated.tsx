@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
@@ -20,8 +20,8 @@ export default function AlarmActivatedScreen() {
   const [dismissed, setDismissed] = useState(false);
   const knobWidth = 134;
   const maxTravel = Math.max(trackWidth - knobWidth - 8, 0);
-  const offset = useRef(new Animated.Value(0)).current;
-  const currentOffset = useRef(0);
+  // useState con inicializador perezoso: crea el valor animado una sola vez sin leer un ref en el render.
+  const [offset] = useState(() => new Animated.Value(0));
   const player = useAudioPlayer(alarmSound, { updateInterval: 1000 });
 
   useEffect(() => {
@@ -44,30 +44,32 @@ export default function AlarmActivatedScreen() {
     };
   }, [player]);
 
-  const finish = () => {
+  const finish = useCallback(() => {
     setDismissed(true);
     player.pause();
     player.seekTo(0);
     Animated.spring(offset, { toValue: maxTravel, useNativeDriver: true }).start(({ finished }) => {
       if (finished) router.replace('/alarms');
     });
-  };
+  }, [offset, player, maxTravel]);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 4,
-      onPanResponderMove: (_, gesture) => {
-        const next = Math.max(0, Math.min(currentOffset.current + gesture.dx, maxTravel));
-        offset.setValue(next);
-      },
-      onPanResponderRelease: (_, gesture) => {
-        const next = Math.max(0, Math.min(currentOffset.current + gesture.dx, maxTravel));
-        if (next > maxTravel * 0.72) finish();
-        else Animated.spring(offset, { toValue: 0, useNativeDriver: true }).start();
-        currentOffset.current = next > maxTravel * 0.72 ? maxTravel : 0;
-      },
-    }),
-  ).current;
+  // El gesto se rehace cuando cambia el recorrido, para no quedarse con el ancho del primer render.
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 4,
+        // El botón siempre arranca en cero: tras soltarlo, o vuelve al inicio o se va al final y sale de la pantalla.
+        onPanResponderMove: (_, gesture) => {
+          offset.setValue(Math.max(0, Math.min(gesture.dx, maxTravel)));
+        },
+        onPanResponderRelease: (_, gesture) => {
+          const next = Math.max(0, Math.min(gesture.dx, maxTravel));
+          if (next > maxTravel * 0.72) finish();
+          else Animated.spring(offset, { toValue: 0, useNativeDriver: true }).start();
+        },
+      }),
+    [offset, maxTravel, finish],
+  );
 
   return (
     <ScreenBackground>
