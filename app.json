@@ -4,12 +4,23 @@
     "slug": "geolarm-mobile",
     "version": "1.0.0",
     "scheme": "geolarm",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.geolarm.app"
+    },
+    "android": {
+      "package": "com.geolarm.app",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -22,10 +33,17 @@
         {
           "locationWhenInUsePermission": "Geolarm usa tu ubicación para activar las alarmas cuando llegues a tu destino."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "996034d8-c193-4091-95bf-cdca98ca711e"
+      }
     }
   }
 }
